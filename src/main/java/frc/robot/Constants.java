@@ -8,6 +8,7 @@ public final class Constants {
         public static final double WHEEL_COF = 1.19; // temporary placeholder LOW PRIORITY (DO LAST)
         public static final double MAX_SPEED = 8; // in m/s, TODO: TEMP VALUE
         public static final double DRIVE_RATIO = 6.75; // gear ratio of drive motor (x rotations to 1 wheel rotation)
+        public static final double DRIVE_CURRENT_LIM = 40; // in Amps
     }
 
     public final class Robot {

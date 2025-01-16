@@ -82,8 +82,14 @@ public class SwerveSubsystem extends SubsystemBase {
             new Translation2d(Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, -Constants.Swerve.VERTICAL_MODULE_DISTANCE), // BR
         };
 
-        ModuleConfig moduleConfig = new ModuleConfig(Constants.Swerve.WHEEL_RADIUS, Constants.Swerve.MAX_SPEED*Constants.Swerve.DRIVE_RATIO, Constants.Swerve.WHEEL_COF, new DCMotor(0, 0, 0, 0, 0, 0), 0, 0)
-        // TODO: URGENT
+        ModuleConfig moduleConfig = new ModuleConfig(
+            Constants.Swerve.WHEEL_RADIUS, 
+            Constants.Swerve.MAX_SPEED*Constants.Swerve.DRIVE_RATIO, 
+            Constants.Swerve.WHEEL_COF, 
+            new DCMotor(12, 3.6, 211, 3.6, 6784*2*Math.PI, 1).withReduction(Constants.Swerve.DRIVE_RATIO), 
+            Constants.Swerve.DRIVE_CURRENT_LIM, 
+            1
+        );
 
         robotConfig = new RobotConfig(Constants.Robot.MASS, Constants.Robot.MOMENT_OF_INERTIA, moduleConfig, moduleOffsets);
         // These two final lines are only needed for simulation purposes, they are
