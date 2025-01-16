@@ -9,12 +9,15 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib..HolonomicPathFollowerConfig;
+import com.pathplanner.lib.config.ModuleConfig;
 import com.pathplanner.lib.config.PIDConstants;
+import com.pathplanner.lib.config.RobotConfig;
+import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
+import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -30,7 +33,8 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class SwerveSubsystem extends SubsystemBase {
     File swerveJsonDirectory;
     SwerveDrive swerveDrive;
-    HolonomicPathFollowerConfig pathFollowerConfig;
+    PPHolonomicDriveController pathFollowerConfig;
+    RobotConfig robotConfig;
 
     public SwerveSubsystem() {
         // For the JSON Configuration of Swerve, see the src/main/deploy/swerve
@@ -40,7 +44,7 @@ public class SwerveSubsystem extends SubsystemBase {
         // JSON structure)
         swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
-        JSONObject driveProperties, pidfDriveConfig, pidfAngleConfig;
+        JSONObject pidfDriveConfig, pidfAngleConfig;
 
         try {
             // Create Swerve Drive
@@ -48,18 +52,15 @@ public class SwerveSubsystem extends SubsystemBase {
 
             // Get nessecary configs for AutoBuilder configuration
             JSONParser parser = new JSONParser();
-            JSONObject configFile = (JSONObject) parser
-                    .parse(new FileReader(new File(swerveJsonDirectory, "modules/physicalproperties.json")));
             JSONObject pidfConfigFile = (JSONObject) parser
                     .parse(new FileReader(new File(swerveJsonDirectory, "modules/pidfproperties.json")));
-            driveProperties = (JSONObject) ((JSONObject) configFile.get("conversionFactors")).get("drive");
             pidfDriveConfig = (JSONObject) pidfConfigFile.get("drive");
             pidfAngleConfig = (JSONObject) pidfConfigFile.get("angle");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        pathFollowerConfig = new HolonomicPathFollowerConfig(
+        pathFollowerConfig = new PPHolonomicDriveController(
             new PIDConstants( // translation constants
                 (Double) pidfDriveConfig.get("p"),
                 (Double) pidfDriveConfig.get("i"),
@@ -71,12 +72,20 @@ public class SwerveSubsystem extends SubsystemBase {
                 (Double) pidfAngleConfig.get("i"),
                 (Double) pidfAngleConfig.get("d"),
                 (Double) pidfAngleConfig.get("iz")
-            ),
-            Constants.Swerve.MAX_SPEED,
-            ((Double) driveProperties.get("diameter"))/2,
-            new ReplanningConfig(true, true)
+            )
         );
 
+        Translation2d[] moduleOffsets = {
+            new Translation2d(-Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, Constants.Swerve.VERTICAL_MODULE_DISTANCE), // FL
+            new Translation2d(Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, Constants.Swerve.VERTICAL_MODULE_DISTANCE), // FR
+            new Translation2d(-Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, -Constants.Swerve.VERTICAL_MODULE_DISTANCE), // BL
+            new Translation2d(Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, -Constants.Swerve.VERTICAL_MODULE_DISTANCE), // BR
+        };
+
+        ModuleConfig moduleConfig = new ModuleConfig(Constants.Swerve.WHEEL_RADIUS, Constants.Swerve.MAX_SPEED*Constants.Swerve.DRIVE_RATIO, Constants.Swerve.WHEEL_COF, new DCMotor(0, 0, 0, 0, 0, 0), 0, 0)
+        // TODO: URGENT
+
+        robotConfig = new RobotConfig(Constants.Robot.MASS, Constants.Robot.MOMENT_OF_INERTIA, moduleConfig, moduleOffsets);
         // These two final lines are only needed for simulation purposes, they are
         // configured based on control method of a real bot
         if (!Robot.isReal()) {
@@ -84,27 +93,25 @@ public class SwerveSubsystem extends SubsystemBase {
             swerveDrive.setCosineCompensator(false);
         }
 
-        AutoBuilder.configureHolonomic(
+        AutoBuilder.configure(
                 this::getPose, // Robot pose supplier
                 this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-                this::getCurrentSpeeds, // ChassisSpeeds supplier. MUST BE ROBOT RELATIVE
-                (speeds) -> driveRobotRelative(speeds), // Method that will drive the robot given ROBOT RELATIVE
-                                                        // ChassisSpeeds. Also optionally outputs individual module
-                                                        // feedforwards
-                pathFollowerConfig, // The robot configuration
+                this::getCurrentSpeeds,
+                (speeds) -> driveRobotRelative(speeds),
+                pathFollowerConfig,
+                robotConfig,
                 () -> {
                     // Boolean supplier that controls when the path will be mirrored for the red
                     // alliance
                     // This will flip the path being followed to the red side of the field.
                     // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-
                     var alliance = DriverStation.getAlliance();
                     if (alliance.isPresent()) {
                         return alliance.get() == DriverStation.Alliance.Red;
                     }
                     return false;
                 },
-                this // Reference to this subsystem to set requirements
+                this
         );
     }
 
@@ -130,7 +137,7 @@ public class SwerveSubsystem extends SubsystemBase {
                     headingX.getAsDouble(),
                     headingY.getAsDouble(),
                     swerveDrive.getOdometryHeading().getRadians(),
-                    swerveDrive.getMaximumVelocity()));
+                    swerveDrive.getMaximumModuleDriveVelocity()));
         });
     }
 
@@ -143,7 +150,7 @@ public class SwerveSubsystem extends SubsystemBase {
                     headingX.getAsDouble(),
                     headingY.getAsDouble(),
                     swerveDrive.getOdometryHeading().getRadians(),
-                    swerveDrive.getMaximumAngularVelocity()));
+                    swerveDrive.getMaximumModuleDriveVelocity()));
         });
     }
 
