@@ -14,8 +14,8 @@ public class Coral extends SubsystemBase {
     private double[] positions = {-60, 30, 0, 30, 60};
     
     public Coral() {
-        wheelMotor = new SparkMax(17,  MotorType.kBrushless);
-        turnMotor = new SparkMax(18,  MotorType.kBrushless);
+        // wheelMotor = new SparkMax(17,  MotorType.kBrushless);
+        // turnMotor = new SparkMax(18,  MotorType.kBrushless);
         angleReader = turnMotor.getAbsoluteEncoder();
     }
 

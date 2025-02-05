@@ -6,7 +6,7 @@ public final class Constants {
         public static final double VERTICAL_MODULE_DISTANCE = 0; // TODO: distance from center of bot to forward/rear modules in meters
         public static final double HORIZONTAL_MODULE_DISTANCE = 0; // TODO: distance from center of bot to left/right modules in meters
         public static final double WHEEL_COF = 1.19; // temporary placeholder LOW PRIORITY (DO LAST)
-        public static final double MAX_SPEED = 8; // in m/s, TODO: TEMP VALUE
+        public static final double MAX_SPEED = 40; // in m/s, TODO: TEMP VALUE
         public static final double DRIVE_RATIO = 6.75; // gear ratio of drive motor (x rotations to 1 wheel rotation)
         public static final double DRIVE_CURRENT_LIM = 40; // in Amps
     }
