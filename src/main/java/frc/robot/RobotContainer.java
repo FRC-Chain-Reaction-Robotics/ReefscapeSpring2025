@@ -24,17 +24,17 @@ public class RobotContainer {
   public DigitalInput input;
 
   Command driveFieldOrientedDirectAngle = drivebase.driveCommand(
-      () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.15),
-      () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), 0.15),
-      () -> MathUtil.applyDeadband(-driverXbox.getRightX(), 0.15),
-      () -> MathUtil.applyDeadband(-driverXbox.getRightY(), 0.15)
+      () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.05),
+      () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), 0.05),
+      () -> MathUtil.applyDeadband(-driverXbox.getRightX(), 0.05),
+      () -> MathUtil.applyDeadband(-driverXbox.getRightY(), 0.05)
     );
 
     Command driveFieldOrientedDirectAngleSim = drivebase.simDriveCommand(
-      () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.15),
-      () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), 0.15),
-      () -> MathUtil.applyDeadband(-driverXbox.getRightX(), 0.15),
-      () -> MathUtil.applyDeadband(-driverXbox.getRightY(), 0.15)
+      () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.05),
+      () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), 0.05),
+      () -> MathUtil.applyDeadband(-driverXbox.getRightX(), 0.05),
+      () -> MathUtil.applyDeadband(-driverXbox.getRightY(), 0.05)
     );
 
   public RobotContainer() {
