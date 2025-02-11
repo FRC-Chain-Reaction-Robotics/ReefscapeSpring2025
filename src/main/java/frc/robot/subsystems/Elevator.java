@@ -1,14 +1,19 @@
 package frc.robot.subsystems;
+import java.util.function.BooleanSupplier;
+import java.util.function.DoubleSupplier;
+
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Elevator extends SubsystemBase {
     private SparkMax sparkMax1, sparkMax2;
-    private SparkLimitSwitch forwardLimitSwitch, reverseLimitSwitch;
+    private DigitalInput forwardLimitSwitch, reverseLimitSwitch;
 
     public Elevator()
     {
@@ -17,40 +22,44 @@ public class Elevator extends SubsystemBase {
         // SparkMax2: 16
         sparkMax1 = new SparkMax(15, MotorType.kBrushless);
         sparkMax2 = new SparkMax(16, MotorType.kBrushless);
-        forwardLimitSwitch = sparkMax1.getForwardLimitSwitch();
-        reverseLimitSwitch = sparkMax1.getReverseLimitSwitch();
+        forwardLimitSwitch = new DigitalInput(9);
+        reverseLimitSwitch = new DigitalInput(8);
     }
     
-    public void reverse() {
-        sparkMax1.set(-1.0);
-        sparkMax2.set(-1.0);
-
-        new RunCommand(() -> {
-            if(reverseLimitSwitch.isPressed())
-            {
-                sparkMax1.set(0);
-                sparkMax2.set(0);
-            }
-        }, this).until(() -> {
-            return reverseLimitSwitch.isPressed();
-        });
-
+    public void up(double speed) {
+        if (!forwardLimitSwitch.get()) {
+            sparkMax1.set(speed);
+            sparkMax2.set(speed);
+        } else {
+            sparkMax1.set(0.0);
+            sparkMax2.set(0.0);
+        }
     }
 
-    public void forward() {
-        sparkMax1.set(1.0);
-        sparkMax2.set(1.0);
+    public void down(double speed) {
+        if (!reverseLimitSwitch.get()) {
+            sparkMax1.set(-speed);
+            sparkMax2.set(-speed);
+        } else {
+            sparkMax1.set(0.0);
+            sparkMax2.set(0.0);
+        }
+    }
 
-        new RunCommand(() -> {
-            if(forwardLimitSwitch.isPressed())
-            {
-                sparkMax1.set(0);
-                sparkMax2.set(0);
-            }
-        }, this).until(() -> {
-            return forwardLimitSwitch.isPressed();
-        });
-
+    public void off() {
+        sparkMax1.set(0.0);
+        sparkMax2.set(0.0);
     }
     
+    public Command elevatorCommand(BooleanSupplier up, BooleanSupplier down) {
+        return run(() -> {
+            if (!(down.getAsBoolean() || up.getAsBoolean())) {
+                off();
+            } else if (down.getAsBoolean()) {
+                down(1.0);
+            } else {
+                up(1.0);
+            }
+        });
+    }
 }

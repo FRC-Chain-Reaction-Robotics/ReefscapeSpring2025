@@ -4,56 +4,54 @@
 
 package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
-
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class RobotContainer {
   private SwerveSubsystem drivebase = new SwerveSubsystem();
+  private Elevator elevator = new Elevator();
   final CommandXboxController driverXbox = new CommandXboxController(0);
   private final SendableChooser<Command> autoChooser;
-  public DigitalInput input;
 
   Command driveFieldOrientedDirectAngle = drivebase.driveCommand(
       () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.05),
       () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), 0.05),
-      () -> MathUtil.applyDeadband(-driverXbox.getRightX(), 0.05),
-      () -> MathUtil.applyDeadband(-driverXbox.getRightY(), 0.05)
+      () -> MathUtil.applyDeadband(-driverXbox.getRightX(), 0.05)
+      // ,() -> MathUtil.applyDeadband(-driverXbox.getRightY(), 0.05)
     );
 
-    Command driveFieldOrientedDirectAngleSim = drivebase.simDriveCommand(
+    Command driveFieldOrientedDirectAngleSim = drivebase.driveCommand(
       () -> MathUtil.applyDeadband(-driverXbox.getLeftY(), 0.05),
       () -> MathUtil.applyDeadband(-driverXbox.getLeftX(), 0.05),
-      () -> MathUtil.applyDeadband(-driverXbox.getRightX(), 0.05),
-      () -> MathUtil.applyDeadband(-driverXbox.getRightY(), 0.05)
+      () -> MathUtil.applyDeadband(-driverXbox.getRightX(), 0.05)
+      // ,() -> MathUtil.applyDeadband(-driverXbox.getRightY(), 0.05)
     );
+
+    Command elevCommand = elevator.elevatorCommand(driverXbox.povUp(), driverXbox.povDown());
 
   public RobotContainer() {
     // autoChooser = AutoBuilder.buildAutoChooser();
     autoChooser = null;
-    // or alternatively to select a default use
-    // autoChooser = AutoBuilder.buildAutoChooser("Default Auto");
     // NamedCommands.registerCommand(null, driveFieldOrientedDirectAngleSim);
     configureBindings();
     // SmartDashboard.putData("Auto Chooser", autoChooser);
   }
 
   private void configureBindings() {
-
+    // Swerve Drivebase configuaration
     if (RobotBase.isSimulation()) {
       drivebase.setDefaultCommand(driveFieldOrientedDirectAngleSim);
     } else {
       drivebase.setDefaultCommand(driveFieldOrientedDirectAngle);
     }
+
+    //Elevator configuration
+    elevator.setDefaultCommand(elevCommand);
   }
 
   public Command getAutonomousCommand() {

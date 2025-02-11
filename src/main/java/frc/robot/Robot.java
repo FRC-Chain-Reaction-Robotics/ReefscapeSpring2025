@@ -50,10 +50,6 @@ public class Robot extends TimedRobot {
 
   @Override
   public void teleopInit() {
-    new RunCommand(() -> {
-      if(m_robotContainer.input.get())
-        System.out.println("on");    
-      });
     if (m_autonomousCommand != null) {
       m_autonomousCommand.cancel();
     }
