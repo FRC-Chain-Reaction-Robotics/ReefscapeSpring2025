@@ -1,42 +1,72 @@
 package frc.robot.subsystems;
 
+import java.util.function.DoubleSupplier;
+
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkAbsoluteEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.SparkMax;
 
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.ImproperInitException;
 
 public class Coral extends SubsystemBase {
     private SparkMax wheelMotor;
     private SparkMax turnMotor;
-    private SparkAbsoluteEncoder angleReader;
-    private double[] positions = {-60, 30, 0, 30, 60};
-    
+    private double[] positions = {}; // Count forward in "rotations" from back stop
+    private final SimpleMotorFeedforward m_shooterFeedforward = new SimpleMotorFeedforward(
+            12, 0);
+    private final PIDController m_shooterFeedback = new PIDController(0.1, 0.0, 0.0);
+    private RelativeEncoder pivotEncoder;
+    private DigitalInput backLimitSwitch, forwardLimitSwitch;
+
     public Coral() {
-        // wheelMotor = new SparkMax(17,  MotorType.kBrushless);
-        // turnMotor = new SparkMax(18,  MotorType.kBrushless);
-        angleReader = turnMotor.getAbsoluteEncoder();
+        wheelMotor = new SparkMax(17, MotorType.kBrushless);
+        turnMotor = new SparkMax(18, MotorType.kBrushless);
+        pivotEncoder = turnMotor.getAlternateEncoder();
+        backLimitSwitch = new DigitalInput(7);
+        forwardLimitSwitch = new DigitalInput(6);
+        if (backLimitSwitch.get()) {
+            pivotEncoder.setPosition(0);
+        } else {
+            throw new ImproperInitException();
+        }
     }
 
-    public void turn(int notch) {
-        final double angleEpsilon = 0.5;
-        final double angleRelativeTurnRate = 0.5;
+    public void coralOut() {
+        wheelMotor.set(1);
+    }
 
-        new RunCommand(() -> {
-            double angleDiff = angleReader.getPosition() - positions[notch];
-            if(Math.abs(angleDiff) >= angleEpsilon)
-            {
-                double speed = 0;
-                if(angleDiff < 0)
-                    speed = angleRelativeTurnRate;
-                else if(angleDiff > 0)
-                    speed = -angleRelativeTurnRate;
+    public void coralIn() {
+        wheelMotor.set(-1);
+    }
 
-                turnMotor.set(speed);
+    public void coralOff() {
+        wheelMotor.set(0);
+    }
+
+    public void pivotOff() {
+        turnMotor.set(0.0);
+    }
+
+    public Command coralPivotCommand(DoubleSupplier angle) {
+        return run(() -> {
+            double targetAngle = (angle.getAsDouble() * 360)%360;
+            // Keeps input to PID controller within bounds
+            if (targetAngle < 0) {
+                targetAngle = 0;
+            } else if (targetAngle > Constants.Coral.MAX_ANGLE) {
+                targetAngle = Constants.Coral.MAX_ANGLE;
             }
-        }, this).until(() -> {
-            return Math.abs(angleReader.getPosition() - positions[notch]) < angleEpsilon;
+
         });
     }
+
 }

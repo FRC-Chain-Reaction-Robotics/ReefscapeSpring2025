@@ -15,4 +15,9 @@ public final class Constants {
         public static final double MASS = 0; // TODO: get mass of bot
         public static final double MOMENT_OF_INERTIA = 0; // TODO: in KG*M^2
     }
+
+    public final class Coral {
+        public static final double MAX_ANGLE = 120;
+        public static final double DISALLOWED_HALF_ANGLE = 240;
+    }
 }
