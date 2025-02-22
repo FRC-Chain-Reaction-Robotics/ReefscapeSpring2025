@@ -54,6 +54,7 @@ public class Elevator extends SubsystemBase {
 
     public Command elevatorCommand(BooleanSupplier up, BooleanSupplier down) {
         return run(() -> {
+
             if (!(down.getAsBoolean() || up.getAsBoolean())) {
                 off();
             } else if (down.getAsBoolean()) {

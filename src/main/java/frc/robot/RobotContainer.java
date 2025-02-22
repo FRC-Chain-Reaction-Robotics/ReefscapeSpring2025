@@ -12,12 +12,14 @@ import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.subsystems.Coral;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.SwerveSubsystem;
 
 public class RobotContainer {
   // private SwerveSubsystem drivebase = new SwerveSubsystem();
-  private Elevator elevator = new Elevator();
+  // private Elevator elevator = new Elevator();
+  private Coral coral = new Coral();
   final CommandXboxController driverXbox = new CommandXboxController(0);
   private final SendableChooser<Command> autoChooser;
   final CommandXboxController operatorXbox = new CommandXboxController(1);
@@ -57,7 +59,8 @@ public class RobotContainer {
     // Elevator configuration
     System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa");
     
-    elevator.setDefaultCommand(elevator.elevatorCommand(upTrigger, downTrigger));
+    // elevator.setDefaultCommand(elevator.elevatorCommand(upTrigger, downTrigger));
+    coral.setDefaultCommand(coral.coralPivotCommand(() -> { return driverXbox.getRightX(); }));
   }
 
   public Command getAutonomousCommand() {

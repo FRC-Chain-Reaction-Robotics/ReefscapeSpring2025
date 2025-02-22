@@ -17,12 +17,16 @@ public final class Constants {
     }
 
     public final class Coral {
-        public static final double MAX_ANGLE = 120;
-        public static final double DISALLOWED_HALF_ANGLE = 240;
+        public static final double MAX_ANGLE = 0.35;
 
-        public static final double kS = 0.1;
-        public static final double kG = 0.1;
+        public static final double ffAngleOffset = 0.0;
+
+
+        public static final double kS = 0.5;
+        public static final double kG = 0.5;
         public static final double kV = 0.1;
         public static final double kA = 0.1;
+        public static final double MAX_V = 2;
+        public static final double MAX_A = 1;
     }
 }
