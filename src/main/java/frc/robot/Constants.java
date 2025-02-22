@@ -19,5 +19,10 @@ public final class Constants {
     public final class Coral {
         public static final double MAX_ANGLE = 120;
         public static final double DISALLOWED_HALF_ANGLE = 240;
+
+        public static final double kS = 0.1;
+        public static final double kG = 0.1;
+        public static final double kV = 0.1;
+        public static final double kA = 0.1;
     }
 }
