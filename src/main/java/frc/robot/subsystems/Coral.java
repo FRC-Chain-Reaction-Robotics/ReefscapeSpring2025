@@ -44,7 +44,7 @@ public class Coral extends SubsystemBase {
                     Units.degreesToRadians(90))); // Max arm speed and acceleration.
     private TrapezoidProfile.State m_lastProfiledReference = new TrapezoidProfile.State();
 
-    private final LinearSystem<N2, N1, N2> m_armPlant = LinearSystemId.createSingleJointedArmSystem(DCMotor.getNEO(1),
+    private final LinearSystem<N2, N1, N2> m_armPlant = LinearSystemId.createSingleJointedArmSystem(DCMotor.getNeoVortex(1),
             Constants.Coral.kArmMOI, Constants.Coral.kArmGearing);
 
     
