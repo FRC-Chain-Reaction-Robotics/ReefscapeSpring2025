@@ -1,5 +1,7 @@
 package frc.robot;
 
+import edu.wpi.first.math.util.Units;
+
 public final class Constants {
     public final class Swerve {
         public static final double WHEEL_RADIUS = 0.1016; // in meters
@@ -17,16 +19,9 @@ public final class Constants {
     }
 
     public final class Coral {
-        public static final double MAX_ANGLE = 0.35;
-
-        public static final double ffAngleOffset = 0.0;
-
-
-        public static final double kS = 0.5;
-        public static final double kG = 0.5;
-        public static final double kV = 0.1;
-        public static final double kA = 0.1;
-        public static final double MAX_V = 2;
-        public static final double MAX_A = 1;
+        public static final double kArmMOI = 0.00010080625;
+        public static final double kArmGearing = 25;
+        public static final double kRaisedPosition = Units.degreesToRadians(90.0);
+        public static final double kLoweredPosition = Units.degreesToRadians(0.0);
     }
 }
