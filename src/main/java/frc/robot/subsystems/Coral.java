@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 
 import com.revrobotics.AbsoluteEncoder;
@@ -85,18 +86,14 @@ public class Coral extends SubsystemBase {
     private final LinearSystemLoop<N2, N1, N1> m_loop = new LinearSystemLoop<>(
             (LinearSystem<N2, N1, N1>) m_armPlant.slice(0), m_controller, m_observer, 12.0, 0.020);
 
-    private DutyCycleEncoder pivotEncoder;
     private Encoder m_encoder;
-    private DigitalInput backLimitSwitch, forwardLimitSwitch;
 
     public Coral() {
         wheelMotor = new SparkMax(18, MotorType.kBrushless);
 
         turnMotor = new SparkMax(17, MotorType.kBrushless);
         m_encoder = new Encoder(1, 2, false);
-
-        backLimitSwitch = new DigitalInput(7);
-        forwardLimitSwitch = new DigitalInput(6);
+        m_encoder.setDistancePerPulse(4 * Math.PI * 1/8192);
 
         // Reset our loop to make sure it's in a known state.
         m_loop.reset(VecBuilder.fill(m_encoder.getDistance(), m_encoder.getRate()));
@@ -121,15 +118,16 @@ public class Coral extends SubsystemBase {
         turnMotor.set(0.0);
     }
 
-    public Command coralPivotCommand(DoubleSupplier angle) {
+    public Command coralPivotCommand(BooleanSupplier angle) {
         return run(() -> {
-            TrapezoidProfile.State goal = new TrapezoidProfile.State(Constants.Coral.kRaisedPosition, 0.0);
+            TrapezoidProfile.State goal = new TrapezoidProfile.State(angle.getAsBoolean()?Constants.Coral.kRaisedPosition:Constants.Coral.kLoweredPosition, 0.0);
 
             // Step our TrapezoidalProfile forward 20ms and set it as our next reference
             m_lastProfiledReference = m_profile.calculate(0.020, m_lastProfiledReference, goal);
             m_loop.setNextR(m_lastProfiledReference.position, m_lastProfiledReference.velocity);
             // Correct our Kalman filter's state vector estimate with encoder data.
             m_loop.correct(VecBuilder.fill(m_encoder.getDistance()));
+            System.out.println("Encoder: " + m_encoder.getDistance());
 
             // Update our LQR to generate new voltage commands and use the voltages to
             // predict the next
