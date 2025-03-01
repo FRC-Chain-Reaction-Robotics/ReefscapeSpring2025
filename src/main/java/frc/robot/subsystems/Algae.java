@@ -8,8 +8,8 @@ public class Algae {
      private SparkMax angleMotor;
 
     public Algae() {
-        intakeMotor = new SparkMax(x, MotorType.kBrushless);
-        angleMotor = new SparkMax(x, MotorType.kBrushless);
+        intakeMotor = new SparkMax(0, MotorType.kBrushless);
+        angleMotor = new SparkMax(1, MotorType.kBrushless);
 
     }
 

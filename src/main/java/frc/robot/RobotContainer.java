@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -57,14 +58,17 @@ public class RobotContainer {
     upTrigger = driverXbox.povUp();
     downTrigger = driverXbox.povDown();
     // Elevator configuration
-    System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa");
     
     // elevator.setDefaultCommand(elevator.elevatorCommand(upTrigger, downTrigger));
-    driverXbox.a().whileTrue(coral.dynamicTestCommF());
-    driverXbox.b().whileTrue(coral.dynamicTestCommR());
-    driverXbox.x().whileTrue(coral.quasistaticTestCommF());
-    driverXbox.y().whileTrue(coral.quasistaticTestCommR());
-    // coral.setDefaultCommand(coral.coralPivotCommand(driverXbox.a()));
+    // driverXbox.a().whileTrue(coral.dynamicTestCommF());
+    // driverXbox.b().whileTrue(coral.dynamicTestCommR());
+    // driverXbox.x().whileTrue(coral.quasistaticTestCommF());
+    // driverXbox.y().whileTrue(coral.quasistaticTestCommR());
+    driverXbox.a().whileTrue(coral.coralPivotCommand(driverXbox.b()));
+    driverXbox.a().onFalse(new InstantCommand(() -> {coral.pivotOff();}));
+    driverXbox.x().onTrue(new InstantCommand(() -> {
+      coral.resetEncoder();
+    }));
   }
 
   public Command getAutonomousCommand() {
