@@ -19,7 +19,7 @@ public final class Constants {
     }
 
     public final class Coral {
-        public static final double kArmMOI = 0.004;
+        public static final double kArmMOI = 0.005;
         public static final double kArmGearing = 1;
         //WARNING DO NOT EVER FORGET .0 BECAUSE IT WILL SNAP YOUR ARMS AND LEGS, ETC PLEASE I BEG YOU, THIS IS A REALLY BIG ISSUE DO NOT EVER MESS IT UP.
         public static final double kRaisedPosition = Units.degreesToRadians(90.0);

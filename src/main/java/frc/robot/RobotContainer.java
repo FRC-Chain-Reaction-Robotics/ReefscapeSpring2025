@@ -60,8 +60,11 @@ public class RobotContainer {
     System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAa");
     
     // elevator.setDefaultCommand(elevator.elevatorCommand(upTrigger, downTrigger));
-
-    coral.setDefaultCommand(coral.coralPivotCommand(driverXbox.a()));
+    driverXbox.a().whileTrue(coral.dynamicTestCommF());
+    driverXbox.b().whileTrue(coral.dynamicTestCommR());
+    driverXbox.x().whileTrue(coral.quasistaticTestCommF());
+    driverXbox.y().whileTrue(coral.quasistaticTestCommR());
+    // coral.setDefaultCommand(coral.coralPivotCommand(driverXbox.a()));
   }
 
   public Command getAutonomousCommand() {
