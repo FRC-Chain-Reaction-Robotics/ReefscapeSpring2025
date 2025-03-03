@@ -2,13 +2,24 @@ package frc.robot.subsystems;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
+import java.util.function.IntSupplier;
 
+import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLimitSwitch;
 import com.revrobotics.spark.SparkMax;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 
+import edu.wpi.first.math.Nat;
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.controller.LinearQuadraticRegulator;
+import edu.wpi.first.math.estimator.KalmanFilter;
+import edu.wpi.first.math.numbers.*;
+import edu.wpi.first.math.system.LinearSystem;
+import edu.wpi.first.math.system.LinearSystemLoop;
+import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -16,6 +27,32 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 public class Elevator extends SubsystemBase {
     private SparkMax sparkMax1, sparkMax2;
     private DigitalInput forwardLimitSwitch, reverseLimitSwitch;
+
+    private LinearSystem<N2, N1, N2> elevatorPlant = LinearSystemId.identifyPositionSystem(-1, -1);
+
+    @SuppressWarnings("unchecked")
+    private KalmanFilter<N2, N1, N1> filter = new KalmanFilter<>(
+        Nat.N2(), 
+        Nat.N1(), 
+        (LinearSystem<N2, N1, N1>) elevatorPlant.slice(0), 
+        VecBuilder.fill(0.015, 0.17), //System estimate accuracy in meters and meters per second
+        VecBuilder.fill(0.001), //Input accuracy (the encoder)
+        0.020);
+
+    @SuppressWarnings("unchecked")
+    private LinearQuadraticRegulator<N2, N1, N1> controller = new LinearQuadraticRegulator<>(
+        (LinearSystem<N2, N1, N1>) elevatorPlant.slice(0), 
+        VecBuilder.fill(0, 0), // State error tolerance in meters and meters per second
+        VecBuilder.fill(0), // Control effort in volts
+        0.020);
+
+    @SuppressWarnings("unchecked")
+    private LinearSystemLoop<N2, N1, N1> elevatorLoop = new LinearSystemLoop<>(
+        (LinearSystem<N2, N1, N1>) elevatorPlant.slice(0),
+        controller,
+        filter,
+        12.0,
+        0.020);
 
     public Elevator() {
         // Orignal IDs:
@@ -52,6 +89,11 @@ public class Elevator extends SubsystemBase {
         sparkMax2.set(0.0);
     }
 
+    public Command elevatorCommand(IntSupplier in) {
+        return null;
+    }
+
+    @Deprecated
     public Command elevatorCommand(BooleanSupplier up, BooleanSupplier down) {
         return run(() -> {
 
