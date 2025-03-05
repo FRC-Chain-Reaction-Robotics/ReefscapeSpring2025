@@ -23,5 +23,17 @@ public final class Constants {
         public static final double kArmGearing = 1;
         public static final double kRaisedPosition = Units.degreesToRadians(110.0);
         public static final double kLoweredPosition = Units.degreesToRadians(0.0);
+        public static final int forwardLimitSwitch = -1;
+        public static final int reverseLimitSwitch = -1;
+    }
+
+    public final class Elevator {
+        public static final int forwardLimitSwitch = 9;
+        public static final int reverseLimitSwitch = 8;
+    }
+
+    public final class Algae {
+        public static final int upLimitSwitch = -1;
+        public static final int downLimitSwitch = -1;
     }
 }

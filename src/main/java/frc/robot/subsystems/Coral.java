@@ -6,11 +6,8 @@ import static edu.wpi.first.units.Units.Radians;
 
 
 import java.util.function.BooleanSupplier;
-import java.util.function.DoubleSupplier;
-
-import com.revrobotics.AbsoluteEncoder;
-import com.revrobotics.RelativeEncoder;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.MathUtil;
@@ -39,7 +36,7 @@ import frc.robot.Constants;
 
 public class Coral extends SubsystemBase {
     private SparkMax wheelMotor;
-    private SparkMax turnMotor;
+    private SparkFlex turnMotor;
 
     private final TrapezoidProfile m_profile = new TrapezoidProfile(
             new TrapezoidProfile.Constraints(
@@ -48,7 +45,7 @@ public class Coral extends SubsystemBase {
     private TrapezoidProfile.State m_lastProfiledReference = new TrapezoidProfile.State();
 
     private final LinearSystem<N2, N1, N2> m_armPlant = 
-    LinearSystemId.identifyPositionSystem(0.40665, 0.005);
+    LinearSystemId.identifyPositionSystem(0.40665, 0.0005);
     // LinearSystemId.identifyPositionSystem(0.084133, 0.043924);
 
     // LinearSystemId.createSingleJointedArmSystem(DCMotor.getNEO(1),
@@ -77,7 +74,7 @@ public class Coral extends SubsystemBase {
             // velocity, but
             // this
             // can be tuned to balance the two.
-            VecBuilder.fill(1), // relms. Control effort (voltage) tolerance. Decrease this to more
+            VecBuilder.fill(3), // relms. Control effort (voltage) tolerance. Decrease this to more
             // heavily penalize control effort, or make the controller less aggressive. 12
             // is a good
             // starting point because that is the (approximate) maximum voltage of a
@@ -88,28 +85,29 @@ public class Coral extends SubsystemBase {
     // for easy control.
     @SuppressWarnings("unchecked")
     private final LinearSystemLoop<N2, N1, N1> m_loop = new LinearSystemLoop<>(
-            (LinearSystem<N2, N1, N1>) m_armPlant.slice(0), m_controller, m_observer, 0.50, 0.020);
+            (LinearSystem<N2, N1, N1>) m_armPlant.slice(0), m_controller, m_observer, 3, 0.020);
 
     private Encoder m_encoder;
     private SysIdRoutine routine;
 
     public Coral() {
         wheelMotor = new SparkMax(18, MotorType.kBrushless);
-        turnMotor = new SparkMax(17, MotorType.kBrushless);
-        m_encoder = new Encoder(1, 2, false);
+        turnMotor = new SparkFlex(17, MotorType.kBrushless);
+        
+        m_encoder = new Encoder(1, 2, true);
         m_encoder.setDistancePerPulse(2 * Math.PI * 1/2048);
         m_encoder.reset();
-        Config config = new Config(Volts.per(Seconds).of(2), Volts.of(0.35), Seconds.of(0.4));
-        Mechanism mechanism = new Mechanism((v) -> {
-            turnMotor.setVoltage(v);
-        }, (log) -> {
-            log.motor("turnMotor")
-            .voltage(
-                edu.wpi.first.units.Units.Volts.ofBaseUnits(turnMotor.getBusVoltage() * turnMotor.getAppliedOutput()))
-            .angularPosition(edu.wpi.first.units.Units.Radians.ofBaseUnits(m_encoder.getDistance()))
-            .angularVelocity(edu.wpi.first.units.Units.RadiansPerSecond.ofBaseUnits(m_encoder.getRate()));
-        }, this);
-        routine = new SysIdRoutine(config, mechanism);
+        // Config config = new Config(Volts.per(Seconds).of(2), Volts.of(0.35), Seconds.of(0.4));
+        // Mechanism mechanism = new Mechanism((v) -> {
+        //     turnMotor.setVoltage(v);
+        // }, (log) -> {
+        //     log.motor("turnMotor")
+        //     .voltage(
+        //         edu.wpi.first.units.Units.Volts.ofBaseUnits(turnMotor.getBusVoltage() * turnMotor.getAppliedOutput()))
+        //     .angularPosition(edu.wpi.first.units.Units.Radians.ofBaseUnits(m_encoder.getDistance()))
+        //     .angularVelocity(edu.wpi.first.units.Units.RadiansPerSecond.ofBaseUnits(m_encoder.getRate()));
+        // }, this);
+        // routine = new SysIdRoutine(config, mechanism);
 
         // Reset our loop to make sure it's in a known state.
         m_loop.reset(VecBuilder.fill(m_encoder.getDistance(), m_encoder.getRate()));

@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.Encoder;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 
 public class Elevator extends SubsystemBase {
     private SparkMax sparkMax1, sparkMax2;
@@ -60,8 +61,8 @@ public class Elevator extends SubsystemBase {
         // SparkMax2: 16
         sparkMax1 = new SparkMax(18, MotorType.kBrushless);
         sparkMax2 = new SparkMax(16, MotorType.kBrushless);
-        forwardLimitSwitch = new DigitalInput(9);
-        reverseLimitSwitch = new DigitalInput(8);
+        forwardLimitSwitch = new DigitalInput(Constants.Elevator.forwardLimitSwitch);
+        reverseLimitSwitch = new DigitalInput(Constants.Elevator.reverseLimitSwitch);
     }
 
     public void up(double speed) {
