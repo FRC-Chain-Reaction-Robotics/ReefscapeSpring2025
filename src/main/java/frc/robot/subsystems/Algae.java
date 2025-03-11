@@ -1,6 +1,10 @@
 package frc.robot.subsystems;
 
+import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
+
+import java.util.function.BooleanSupplier;
+
 import com.revrobotics.spark.SparkMax;
 
 import edu.wpi.first.math.Nat;
@@ -13,11 +17,13 @@ import edu.wpi.first.math.system.LinearSystem;
 import edu.wpi.first.math.system.LinearSystemLoop;
 import edu.wpi.first.math.system.plant.LinearSystemId;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
-public class Algae {
+public class Algae extends SubsystemBase {
     private SparkMax intakeMotor;
-    private SparkMax angleMotor;
+    private SparkFlex angleMotor;
     private DigitalInput upLimitSwitch, downLimitSwitch;
     /*
      * Uncomment when ready to tune and rename variables
@@ -53,20 +59,22 @@ public class Algae {
     // 0.020);
 
     public Algae() {
-        intakeMotor = new SparkMax(21, MotorType.kBrushless);
-        angleMotor = new SparkMax(22, MotorType.kBrushless);
-        upLimitSwitch = new DigitalInput(Constants.Algae.upLimitSwitch);
-        downLimitSwitch = new DigitalInput(Constants.Algae.downLimitSwitch);
+        intakeMotor = new SparkMax(19, MotorType.kBrushless);
+        angleMotor = new SparkFlex(17, MotorType.kBrushless);
+        // upLimitSwitch = new DigitalInput(Constants.Algae.upLimitSwitch);
+        // downLimitSwitch = new DigitalInput(Constants.Algae.downLimitSwitch);
     }
 
-    public void off() {
-        intakeMotor.set(0.0);
+    public void rotateoff() {
         angleMotor.set(0.0);
+    }
+
+    public void stopIntake() {
+        intakeMotor.set(0);
     }
 
     public void intake(double speed) {
         intakeMotor.set(-speed);
-
     }
 
     public void outtake(double speed) {
@@ -81,4 +89,23 @@ public class Algae {
         angleMotor.set(-speed);
     }
 
+    public Command defaultCommand(BooleanSupplier up, BooleanSupplier down, BooleanSupplier in, BooleanSupplier out) {
+        return run(() -> {
+            if (!(down.getAsBoolean() || up.getAsBoolean())) {
+                rotateoff();
+            } else if (down.getAsBoolean()) {
+                rotatedown(0.5);
+            } else {
+                rotateup(0.5);
+            }
+
+            if (!(in.getAsBoolean() || out.getAsBoolean())) {
+                stopIntake();
+            } else if (in.getAsBoolean()) {
+                intake(0.5);
+            } else {
+                outtake(0.5);
+            }
+        });
+    }
 }

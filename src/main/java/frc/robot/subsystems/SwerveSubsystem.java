@@ -18,9 +18,11 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.system.plant.DCMotor;
+import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Robot;
@@ -50,7 +52,7 @@ public class SwerveSubsystem extends SubsystemBase {
             // Create Swerve Drive
             swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(Constants.Swerve.MAX_SPEED);
 
-            // Get nessecary configs for AutoBuilder configuration
+            // // Get nessecary configs for AutoBuilder configuration
         
             // JSONParser parser = new JSONParser();
             // JSONObject pidfConfigFile = (JSONObject) parser
@@ -180,6 +182,20 @@ public class SwerveSubsystem extends SubsystemBase {
                         true,
                         false);
     });
+  }
+
+  public Command autoCommand() {
+    return new InstantCommand(() -> {
+        try {
+        swerveDrive.drive(new ChassisSpeeds(-3, 0, 0));
+        Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            swerveDrive.drive(new ChassisSpeeds(0, 0, 0));
+        }
+    },
+    this);
   }
 
     public DoubleSupplier getMeasurementSource() {
