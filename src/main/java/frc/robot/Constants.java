@@ -11,6 +11,7 @@ public final class Constants {
         public static final double MAX_SPEED = 2.9; // in m/s, TODO: TEMP VALUE
         public static final double DRIVE_RATIO = 6.75; // gear ratio of drive motor (x rotations to 1 wheel rotation)
         public static final double DRIVE_CURRENT_LIM = 40; // in Amps
+        public static final double REAL_MAX_SPEED = 0; //TODO: TEST PLEASE I BEG
     }
 
     public final class Robot {
@@ -35,5 +36,13 @@ public final class Constants {
     public final class Algae {
         public static final int upLimitSwitch = -1;
         public static final int downLimitSwitch = -1;
+    }
+
+    public final class Limelight {
+        public static final String NAME = "testName";
+    }
+
+    public final class Lift {
+        public static final int LIFTER_MOTOR_ID = 25;
     }
 }

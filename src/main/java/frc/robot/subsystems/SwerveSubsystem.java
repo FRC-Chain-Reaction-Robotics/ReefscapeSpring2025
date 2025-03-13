@@ -21,10 +21,12 @@ import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.units.measure.AngularVelocity;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.LimelightHelpers;
 import frc.robot.Robot;
 import swervelib.SwerveDrive;
 import swervelib.math.SwerveMath;
@@ -52,49 +54,49 @@ public class SwerveSubsystem extends SubsystemBase {
             // Create Swerve Drive
             swerveDrive = new SwerveParser(swerveJsonDirectory).createSwerveDrive(Constants.Swerve.MAX_SPEED);
 
-            // // Get nessecary configs for AutoBuilder configuration
+            // Get nessecary configs for AutoBuilder configuration
         
-            // JSONParser parser = new JSONParser();
-            // JSONObject pidfConfigFile = (JSONObject) parser
-            //         .parse(new FileReader(new File(swerveJsonDirectory, "modules/pidfproperties.json")));
-            // pidfDriveConfig = (JSONObject) pidfConfigFile.get("drive");
-            // pidfAngleConfig = (JSONObject) pidfConfigFile.get("angle");
+            JSONParser parser = new JSONParser();
+            JSONObject pidfConfigFile = (JSONObject) parser
+                    .parse(new FileReader(new File(swerveJsonDirectory, "modules/pidfproperties.json")));
+            pidfDriveConfig = (JSONObject) pidfConfigFile.get("drive");
+            pidfAngleConfig = (JSONObject) pidfConfigFile.get("angle");
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
 
-        // pathFollowerConfig = new PPHolonomicDriveController(
-        //     new PIDConstants( // translation constants
-        //         (Double) pidfDriveConfig.get("p"),
-        //         (Double) pidfDriveConfig.get("i"),
-        //         (Double) pidfDriveConfig.get("d"),
-        //         (Double) pidfDriveConfig.get("iz")
-        //     ),
-        //     new PIDConstants( // rotation constants
-        //         (Double) pidfAngleConfig.get("p"),
-        //         (Double) pidfAngleConfig.get("i"),
-        //         (Double) pidfAngleConfig.get("d"),
-        //         (Double) pidfAngleConfig.get("iz")
-        //     )
-        // );
+        pathFollowerConfig = new PPHolonomicDriveController(
+            new PIDConstants( // translation constants
+                (Double) pidfDriveConfig.get("p"),
+                (Double) pidfDriveConfig.get("i"),
+                (Double) pidfDriveConfig.get("d"),
+                (Double) pidfDriveConfig.get("iz")
+            ),
+            new PIDConstants( // rotation constants
+                (Double) pidfAngleConfig.get("p"),
+                (Double) pidfAngleConfig.get("i"),
+                (Double) pidfAngleConfig.get("d"),
+                (Double) pidfAngleConfig.get("iz")
+            )
+        );
 
-        // Translation2d[] moduleOffsets = {
-        //     new Translation2d(-Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, Constants.Swerve.VERTICAL_MODULE_DISTANCE), // FL
-        //     new Translation2d(Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, Constants.Swerve.VERTICAL_MODULE_DISTANCE), // FR
-        //     new Translation2d(-Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, -Constants.Swerve.VERTICAL_MODULE_DISTANCE), // BL
-        //     new Translation2d(Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, -Constants.Swerve.VERTICAL_MODULE_DISTANCE), // BR
-        // };
+        Translation2d[] moduleOffsets = {
+            new Translation2d(-Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, Constants.Swerve.VERTICAL_MODULE_DISTANCE), // FL
+            new Translation2d(Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, Constants.Swerve.VERTICAL_MODULE_DISTANCE), // FR
+            new Translation2d(-Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, -Constants.Swerve.VERTICAL_MODULE_DISTANCE), // BL
+            new Translation2d(Constants.Swerve.HORIZONTAL_MODULE_DISTANCE, -Constants.Swerve.VERTICAL_MODULE_DISTANCE), // BR
+        };
 
-        // ModuleConfig moduleConfig = new ModuleConfig(
-        //     Constants.Swerve.WHEEL_RADIUS, 
-        //     Constants.Swerve.MAX_SPEED*Constants.Swerve.DRIVE_RATIO, 
-        //     Constants.Swerve.WHEEL_COF, 
-        //     new DCMotor(12, 3.6, 211, 3.6, 6784*2*Math.PI, 1).withReduction(Constants.Swerve.DRIVE_RATIO), 
-        //     Constants.Swerve.DRIVE_CURRENT_LIM, 
-        //     1
-        // );
+        ModuleConfig moduleConfig = new ModuleConfig(
+            Constants.Swerve.WHEEL_RADIUS, 
+            Constants.Swerve.REAL_MAX_SPEED, 
+            Constants.Swerve.WHEEL_COF, 
+            new DCMotor(12, 3.6, 211, 3.6, 6784*2*Math.PI, 1).withReduction(Constants.Swerve.DRIVE_RATIO), 
+            Constants.Swerve.DRIVE_CURRENT_LIM, 
+            1
+        );
 
-        // robotConfig = new RobotConfig(Constants.Robot.MASS, Constants.Robot.MOMENT_OF_INERTIA, moduleConfig, moduleOffsets);
+        robotConfig = new RobotConfig(Constants.Robot.MASS, Constants.Robot.MOMENT_OF_INERTIA, moduleConfig, moduleOffsets);
         // These two final lines are only needed for simulation purposes, they are
         // configured based on control method of a real bot
         if (!Robot.isReal()) {
@@ -102,26 +104,26 @@ public class SwerveSubsystem extends SubsystemBase {
             swerveDrive.setCosineCompensator(false);
         }
 
-        // AutoBuilder.configure(
-        //         this::getPose, // Robot pose supplier
-        //         this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
-        //         this::getCurrentSpeeds,
-        //         (speeds) -> driveRobotRelative(speeds),
-        //         pathFollowerConfig,
-        //         robotConfig,
-        //         () -> {
-        //             // Boolean supplier that controls when the path will be mirrored for the red
-        //             // alliance
-        //             // This will flip the path being followed to the red side of the field.
-        //             // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
-        //             var alliance = DriverStation.getAlliance();
-        //             if (alliance.isPresent()) {
-        //                 return alliance.get() == DriverStation.Alliance.Red;
-        //             }
-        //             return false;
-        //         },
-        //         this
-        // );
+        AutoBuilder.configure(
+                this::getPose, // Robot pose supplier
+                this::resetPose, // Method to reset odometry (will be called if your auto has a starting pose)
+                this::getCurrentSpeeds,
+                (speeds) -> driveRobotRelative(speeds),
+                pathFollowerConfig,
+                robotConfig,
+                () -> {
+                    // Boolean supplier that controls when the path will be mirrored for the red
+                    // alliance
+                    // This will flip the path being followed to the red side of the field.
+                    // THE ORIGIN WILL REMAIN ON THE BLUE SIDE
+                    var alliance = DriverStation.getAlliance();
+                    if (alliance.isPresent()) {
+                        return alliance.get() == DriverStation.Alliance.Red;
+                    }
+                    return false;
+                },
+                this
+        );
     }
 
     /**
@@ -134,6 +136,7 @@ public class SwerveSubsystem extends SubsystemBase {
      * @param headingY     Heading Y to calculate angle of the joystick.
      * @return Drive command.
      */
+    @Deprecated
     public Command driveCommand(DoubleSupplier translationX, DoubleSupplier translationY, DoubleSupplier headingX,
             DoubleSupplier headingY) {
         return run(() -> {
@@ -150,6 +153,7 @@ public class SwerveSubsystem extends SubsystemBase {
         });
     }
 
+    @Deprecated
     public Command simDriveCommand(DoubleSupplier translationX, DoubleSupplier translationY,
             DoubleSupplier headingX, DoubleSupplier headingY) {
         return run(() -> {
@@ -175,6 +179,7 @@ public class SwerveSubsystem extends SubsystemBase {
   {
     return run(() -> {
       // Make the robot move
+      provideVisionPos();
       swerveDrive.drive(SwerveMath.scaleTranslation(new Translation2d(
                             translationX.getAsDouble() * swerveDrive.getMaximumChassisVelocity(),
                             translationY.getAsDouble() * swerveDrive.getMaximumChassisVelocity()), 0.8),
@@ -184,32 +189,12 @@ public class SwerveSubsystem extends SubsystemBase {
     });
   }
 
-  public Command autoCommand() {
+  public Command simpleAutoCommand() {
     return new InstantCommand(() -> {
-        try {
         swerveDrive.drive(new ChassisSpeeds(-3, 0, 0));
-        Thread.sleep(2000);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } finally {
-            swerveDrive.drive(new ChassisSpeeds(0, 0, 0));
-        }
     },
     this);
   }
-
-    public DoubleSupplier getMeasurementSource() {
-        return () -> {
-            return swerveDrive.getPose().getX();
-        };
-    }
-
-    public DoubleConsumer driveForward() {
-        return (double speed) -> { 
-            swerveDrive.driveFieldOriented(new ChassisSpeeds(speed, 0, 0.0)); 
-        };
-
-    }
 
     public void driveFieldOriented(ChassisSpeeds velocity) {
         swerveDrive.driveFieldOriented(velocity);
@@ -220,6 +205,7 @@ public class SwerveSubsystem extends SubsystemBase {
     }
 
     public Pose2d getPose() {
+        provideVisionPos();
         return swerveDrive.getPose();
     }
 
@@ -231,5 +217,12 @@ public class SwerveSubsystem extends SubsystemBase {
 
     public ChassisSpeeds getCurrentSpeeds() {
         return swerveDrive.getRobotVelocity();
+    }
+
+    public void provideVisionPos() {
+        if (LimelightHelpers.getTargetCount(Constants.Limelight.NAME) >= 2) {
+            swerveDrive.addVisionMeasurement(LimelightHelpers.getBotPose2d(Constants.Limelight.NAME),
+                    Timer.getFPGATimestamp());
+        }
     }
 }
