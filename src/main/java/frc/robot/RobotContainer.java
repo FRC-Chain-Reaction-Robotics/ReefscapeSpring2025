@@ -46,6 +46,7 @@ public class RobotContainer {
   public RobotContainer() {
     // autoChooser = AutoBuilder.buildAutoChooser();
     // NamedCommands.registerCommand(null, driveFieldOrientedDirectAngleSim);
+    LimelightHelpers.setPipelineIndex(Constants.Limelight.NAME, 0);
     configureBindings();
     // SmartDashboard.putData("Auto Chooser", autoChooser);
   }

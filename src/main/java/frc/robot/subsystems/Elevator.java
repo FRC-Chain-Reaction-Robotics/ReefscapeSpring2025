@@ -29,7 +29,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 
 public class Elevator extends SubsystemBase {
-    private SparkMax sparkMax1, sparkMax2;
+    private SparkMax sparkMax1;
     private DigitalInput forwardLimitSwitch, reverseLimitSwitch;
 
     // private LinearSystem<N2, N1, N2> elevatorPlant = LinearSystemId.identifyPositionSystem(-1, -1);
@@ -63,12 +63,10 @@ public class Elevator extends SubsystemBase {
         // SparkMax1: 15
         // SparkMax2: 16
         sparkMax1 = new SparkMax(18, MotorType.kBrushless);
-        sparkMax2 = new SparkMax(16, MotorType.kBrushless);
 
         SparkBaseConfig config1 = new SparkMaxConfig().inverted(true);
         SparkBaseConfig config2 = new SparkMaxConfig().inverted(false);
         sparkMax1.configure(config1, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
-        sparkMax2.configure(config2, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         // forwardLimitSwitch = new DigitalInput(Constants.Elevator.forwardLimitSwitch);
         // reverseLimitSwitch = new DigitalInput(Constants.Elevator.reverseLimitSwitch);
     }
@@ -76,26 +74,21 @@ public class Elevator extends SubsystemBase {
     public void up(double speed) {
         // if (forwardLimitSwitch.get()) {
             sparkMax1.set(speed);
-            sparkMax2.set(speed);
         // } else {
         //     sparkMax1.set(0.0);
-        //     sparkMax2.set(0.0);
         // }
     }
 
     public void down(double speed) {
         // if (reverseLimitSwitch.get()) {
             sparkMax1.set(-speed);
-            sparkMax2.set(-speed);
         // } else {
         //     sparkMax1.set(0.0);
-        //     sparkMax2.set(0.0);
         // }
     }
 
     public void off() {
         sparkMax1.set(0.0);
-        sparkMax2.set(0.0);
     }
 
     public Command elevatorCommand(IntSupplier in) {

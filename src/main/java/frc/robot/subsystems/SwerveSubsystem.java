@@ -41,11 +41,6 @@ public class SwerveSubsystem extends SubsystemBase {
     RobotConfig robotConfig;
 
     public SwerveSubsystem() {
-        // For the JSON Configuration of Swerve, see the src/main/deploy/swerve
-        // directory.
-        // (This is currently unnessecary as its only required for a physical bot but
-        // the basic structure is already there, values just need to be added to the
-        // JSON structure)
         swerveJsonDirectory = new File(Filesystem.getDeployDirectory(), "swerve");
         SwerveDriveTelemetry.verbosity = TelemetryVerbosity.HIGH;
         JSONObject pidfDriveConfig, pidfAngleConfig;
