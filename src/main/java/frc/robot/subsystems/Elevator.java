@@ -65,7 +65,6 @@ public class Elevator extends SubsystemBase {
         sparkMax1 = new SparkMax(18, MotorType.kBrushless);
 
         SparkBaseConfig config1 = new SparkMaxConfig().inverted(true);
-        SparkBaseConfig config2 = new SparkMaxConfig().inverted(false);
         sparkMax1.configure(config1, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         // forwardLimitSwitch = new DigitalInput(Constants.Elevator.forwardLimitSwitch);
         // reverseLimitSwitch = new DigitalInput(Constants.Elevator.reverseLimitSwitch);

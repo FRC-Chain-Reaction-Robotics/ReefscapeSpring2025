@@ -45,7 +45,8 @@ public class Coral extends SubsystemBase {
     private TrapezoidProfile.State m_lastProfiledReference = new TrapezoidProfile.State();
 
     private final LinearSystem<N2, N1, N2> m_armPlant = 
-    LinearSystemId.identifyPositionSystem(0.40665, 0.0005);
+    // LinearSystemId.identifyPositionSystem(0.40665, 0.0005);
+    LinearSystemId.createSingleJointedArmSystem(DCMotor.getNeoVortex(1), Constants.Coral.kArmMOI, Constants.Coral.kArmGearing);
     // LinearSystemId.identifyPositionSystem(0.084133, 0.043924);
 
     // LinearSystemId.createSingleJointedArmSystem(DCMotor.getNEO(1),
