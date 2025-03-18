@@ -71,7 +71,9 @@ public class RobotContainer {
 
     algae.setDefaultCommand(algae.defaultCommand(upAlgaeTrigger, downAlgaeTrigger, inAlgaeTrigger, outAlgaeTrigger));
 
-    elevator.setDefaultCommand(elevator.elevatorCommand(upElevTrigger, downElevTrigger));
+    elevator.setDefaultCommand(elevator.elevatorCommand(() -> {
+      return operatorXbox.getLeftY();
+    }));
     // driverXbox.a().whileTrue(coral.dynamicTestCommF());
     // driverXbox.b().whileTrue(coral.dynamicTestCommR());
     // driverXbox.x().whileTrue(coral.quasistaticTestCommF());

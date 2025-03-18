@@ -13,6 +13,7 @@ import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.SparkBaseConfig;
 import com.revrobotics.spark.config.SparkMaxConfig;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.Nat;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.controller.LinearQuadraticRegulator;
@@ -59,51 +60,21 @@ public class Elevator extends SubsystemBase {
     //     0.020);
 
     public Elevator() {
-        // Orignal IDs:
-        // SparkMax1: 15
-        // SparkMax2: 16
         sparkMax1 = new SparkMax(18, MotorType.kBrushless);
-
         SparkBaseConfig config1 = new SparkMaxConfig().inverted(true);
         sparkMax1.configure(config1, ResetMode.kNoResetSafeParameters, PersistMode.kPersistParameters);
         // forwardLimitSwitch = new DigitalInput(Constants.Elevator.forwardLimitSwitch);
         // reverseLimitSwitch = new DigitalInput(Constants.Elevator.reverseLimitSwitch);
     }
 
-    public void up(double speed) {
-        // if (forwardLimitSwitch.get()) {
-            sparkMax1.set(speed);
-        // } else {
-        //     sparkMax1.set(0.0);
-        // }
-    }
-
-    public void down(double speed) {
-        // if (reverseLimitSwitch.get()) {
-            sparkMax1.set(-speed);
-        // } else {
-        //     sparkMax1.set(0.0);
-        // }
-    }
-
     public void off() {
         sparkMax1.set(0.0);
     }
 
-    public Command elevatorCommand(IntSupplier in) {
-        return null;
-    }
-
-    @Deprecated
-    public Command elevatorCommand(BooleanSupplier up, BooleanSupplier down) {
+    public Command elevatorCommand(DoubleSupplier direction) {
         return run(() -> {
-            if (!(down.getAsBoolean() || up.getAsBoolean())) {
-                off();
-            } else if (down.getAsBoolean()) {
-                down(0.75);
-            } else {
-                up(0.755);
-            }
+            double dir = direction.getAsDouble()*0.7;
+            
         });
     }
 }

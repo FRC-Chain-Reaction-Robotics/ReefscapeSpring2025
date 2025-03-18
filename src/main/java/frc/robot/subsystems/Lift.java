@@ -26,10 +26,10 @@ public class Lift extends SubsystemBase {
     }
 
     public void pull() {
-
+        lifter.set(0.5);
     }
 
     public void release() {
-        
+        lifter.set(-0.5);
     }
 }

@@ -34,6 +34,8 @@ public final class Constants {
     }
 
     public final class Algae {
+        public static final double kArmMOI = 67.6021683403;
+        public static final double kArmGearing = 120;
         public static final int upLimitSwitch = -1;
         public static final int downLimitSwitch = -1;
     }
